@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Generador De Names</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      max-width: 700px;
+      margin: auto;
+      position: relative;
+      min-height: 100vh;
+    }
+    h2 {
+      color: #00bfff;
+      border-bottom: 2px solid #00bfff;
+      padding-bottom: 5px;
+    }
+    .section {
+      margin-bottom: 50px;
+      padding: 20px;
+      background: #222;
+      border-radius: 8px;
+      position: relative;
+    }
+    label {
+      display: inline-block;
+      margin: 10px 5px 10px 0;
+      font-weight: bold;
+    }
+    input {
+      width: 150px;
+      padding: 6px;
+      font-size: 18px;
+      text-transform: none;
+      text-align: left;
+      margin-right: 15px;
+      border-radius: 4px;
+      border: none;
+    }
+    button, .gender-toggle {
+      padding: 8px 16px;
+      font-size: 18px;
+      background-color: #00bfff;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+      user-select: none;
+    }
+    .gender-toggle {
+      background-color: #444;
+      margin-left: 10px;
+      min-width: 120px;
+    }
+    .gender-toggle.active {
+      background-color: #00bfff;
+    }
+    #resultadoNormal, #resultadoAfro {
+      margin-top: 20px;
+      font-size: 26px;
+      color: #00ffcc;
+      min-height: 40px;
+      word-break: break-word;
+    }
+    /* Developer Mechu text */
+    #developer {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      color: #00bfff88;
+      font-size: 14px;
+      font-weight: bold;
+      user-select: none;
+      font-family: 'Courier New', Courier, monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1>Generador de Nombres Mejorado</h1>
+
+  <!-- Sección Nombres Normales -->
+  <div class="section">
+    <h2>Nombres Normales</h2>
+    <label for="nombreNormal">Nombre (o letra inicial):</label>
+    <input type="text" id="nombreNormal" placeholder="Ej: Gustavo o G" />
+    <label for="apellidoNormal">Apellido (o letra inicial):</label>
+    <input type="text" id="apellidoNormal" placeholder="Ej: Pérez o P" />
+    <button id="botonGenerarNormal">Generar Nombre Normal</button>
+    <button id="toggleGeneroNormal" class="gender-toggle active" data-genero="masculino">Masculino</button>
+    <div id="resultadoNormal"></div>
+  </div>
+
+  <!-- Sección Nombres Afroamericanos -->
+  <div class="section">
+    <h2>Nombres Afroamericanos Urbanos</h2>
+    <label for="nombreAfro">Nombre (o letra inicial):</label>
+    <input type="text" id="nombreAfro" placeholder="Ej: Ja’mal o J" />
+    <label for="apellidoAfro">Apellido (o letra inicial):</label>
+    <input type="text" id="apellidoAfro" placeholder="Ej: W’right o W" />
+    <button id="botonGenerarAfro">Generar Nombre Afroamericano</button>
+    <button id="toggleGeneroAfro" class="gender-toggle active" data-genero="masculino">Masculino</button>
+    <div id="resultadoAfro"></div>
+  </div>
+
+  <div id="developer">Developer Mechu</div>
+
+  <script>
+    // --- Listas nombres normales por género ---
+    const nombresNormalesMasculinos = [
+      "Alberto", "Alejandro", "Andrés", "Antonio", "Carlos", "David", "Diego", "Eduardo",
+      "Fernando", "Francisco", "Gabriel", "Gustavo", "Héctor", "Ignacio", "Javier", "José",
+      "Juan", "Luis", "Manuel", "Marcos", "Martín", "Miguel", "Pablo", "Pedro", "Raúl",
+      "Ricardo", "Roberto", "Sergio", "Tomás", "Vicente", "Víctor"
+    ];
+
+    const nombresNormalesFemeninos = [
+      "Ana", "Beatriz", "Carla", "Daniela", "Elena", "Flor", "Gabriela", "Helena",
+      "Isabel", "Juana", "Lucía", "María", "Natalia", "Olga", "Patricia", "Raquel",
+      "Sandra", "Teresa", "Valeria", "Verónica", "Victoria", "Yolanda", "Zoe"
+    ];
+
+    const apellidosNormales = [
+      "García", "Rodríguez", "González", "Pérez", "López", "Martínez", "Sánchez", "Ramírez",
+      "Cruz", "Flores", "Gómez", "Díaz", "Morales", "Hernández", "Jiménez", "Ruiz",
+      "Álvarez", "Torres", "Vargas", "Castillo", "Ramos", "Mendoza", "Silva", "Navarro",
+      "Ortiz", "Domínguez", "Soto", "Rojas", "Campos", "Fuentes", "Molina"
+    ];
+
+    function elegirPorLetra(arr, letraInicial) {
+      if (!letraInicial || letraInicial.length !== 1 || !letraInicial.match(/[a-zA-Z]/)) {
+        return arr[Math.floor(Math.random() * arr.length)];
+      }
+      letraInicial = letraInicial.toLowerCase();
+      const candidatos = arr.filter(n => n.toLowerCase().startsWith(letraInicial));
+      if (candidatos.length === 0) return arr[Math.floor(Math.random() * arr.length)];
+      return candidatos[Math.floor(Math.random() * candidatos.length)];
+    }
+
+    function generarNombreNormal(nombreInput, apellidoInput, genero) {
+      let nombresArray = genero === "femenino" ? nombresNormalesFemeninos : nombresNormalesMasculinos;
+
+      let nombre, apellido;
+
+      if (!nombreInput || nombreInput.length === 0) {
+        nombre = nombresArray[Math.floor(Math.random() * nombresArray.length)];
+      } else if (nombreInput.length === 1) {
+        nombre = elegirPorLetra(nombresArray, nombreInput);
+      } else {
+        nombre = nombreInput.charAt(0).toUpperCase() + nombreInput.slice(1);
+      }
+
+      if (!apellidoInput || apellidoInput.length === 0) {
+        apellido = apellidosNormales[Math.floor(Math.random() * apellidosNormales.length)];
+      } else if (apellidoInput.length === 1) {
+        apellido = elegirPorLetra(apellidosNormales, apellidoInput);
+      } else {
+        apellido = apellidoInput.charAt(0).toUpperCase() + apellidoInput.slice(1);
+      }
+
+      return `${nombre} ${apellido}`;
+    }
+
+    // --- Generador Afroamericano Urbano ---
+    const prefijosAfro = [
+      "A", "Be", "Ce", "De", "E", "Fa", "Ga", "Ha", "I", "Ja",
+      "Ka", "La", "Ma", "Na", "O", "Pa", "Qu", "Ra", "Sa", "Ta",
+      "U", "Va", "Wa", "Xa", "Ya", "Za"
+    ];
+
+    const sufijosAfro = [
+      "von", "rell", "sean", "quon", "vonte", "elle", "shawn", "leek",
+      "dell", "quez", "tray", "rius", "ante", "ric", "lin", "heem"
+    ];
+
+    const prefijosApellidoAfro = [
+      "A", "Ba", "Ca", "Da", "E", "Fa", "Ga", "Ha", "I", "Ja",
+      "Ka", "La", "Ma", "Na", "O", "Pa", "Qua", "Ra", "Sa", "Ta",
+      "U", "Va", "Wa", "Xa", "Ya", "Za"
+    ];
+
+    const sufijosApellidoAfro = [
+      "son", "mond", "kins", "more", "well", "man", "hart", "ster",
+      "wright", "ley", "ton", "ron", "rez", "drix", "nald", "field"
+    ];
+
+    function insertarApostrofe(p, s) {
+      const usarApostrofe = Math.random() < 0.3;
+      const separador = usarApostrofe ? "’" : "";
+      return p + separador + s;
+    }
+
+    function generarNombreAfroPorLetra(letra, prefijos, sufijos) {
+      letra = letra.toLowerCase();
+      let candidatos = [];
+
+      for (const p of prefijos) {
+        for (const s of sufijos) {
+          const nombre = insertarApostrofe(p, s);
+          if (nombre.toLowerCase().startsWith(letra)) {
+            candidatos.push(nombre);
+          }
+        }
+      }
+
+      if (candidatos.length === 0) {
+        for (const p of prefijos) {
+          for (const s of sufijos) {
+            candidatos.push(insertarApostrofe(p, s));
+          }
+        }
+      }
+
+      const elegido = candidatos[Math.floor(Math.random() * candidatos.length)];
+      return elegido.charAt(0).toUpperCase() + elegido.slice(1);
+    }
+
+    function generarNombreAfro(nombreInput, apellidoInput) {
+      let nombre, apellido;
+
+      if (!nombreInput || nombreInput.length === 0) {
+        nombre = generarNombreAfroPorLetra("a", prefijosAfro, sufijosAfro);
+      } else if (nombreInput.length === 1) {
+        nombre = generarNombreAfroPorLetra(nombreInput, prefijosAfro, sufijosAfro);
+      } else {
+        nombre = nombreInput.charAt(0).toUpperCase() + nombreInput.slice(1);
+      }
+
+      if (!apellidoInput || apellidoInput.length === 0) {
+        apellido = generarNombreAfroPorLetra("a", prefijosApellidoAfro, sufijosApellidoAfro);
+      } else if (apellidoInput.length === 1) {
+        apellido = generarNombreAfroPorLetra(apellidoInput, prefijosApellidoAfro, sufijosApellidoAfro);
+      } else {
+        apellido = apellidoInput.charAt(0).toUpperCase() + apellidoInput.slice(1);
+      }
+
+      return `${nombre} ${apellido}`;
+    }
+
+    // Toggle de género normal
+    const toggleNormal = document.getElementById("toggleGeneroNormal");
+    toggleNormal.addEventListener("click", () => {
+      if (toggleNormal.dataset.genero === "masculino") {
+        toggleNormal.dataset.genero = "femenino";
+        toggleNormal.textContent = "Femenino";
+        toggleNormal.classList.remove("active");
+      } else {
+        toggleNormal.dataset.genero = "masculino";
+        toggleNormal.textContent = "Masculino";
+        toggleNormal.classList.add("active");
+      }
+    });
+
+    // Toggle de género afro (solo visual, sin impacto)
+    const toggleAfro = document.getElementById("toggleGeneroAfro");
+    toggleAfro.addEventListener("click", () => {
+      if (toggleAfro.dataset.genero === "masculino") {
+        toggleAfro.dataset.genero = "femenino";
+        toggleAfro.textContent = "Femenino";
+        toggleAfro.classList.remove("active");
+      } else {
+        toggleAfro.dataset.genero = "masculino";
+        toggleAfro.textContent = "Masculino";
+        toggleAfro.classList.add("active");
+      }
+    });
+
+    // Botón generar normal
+    document.getElementById("botonGenerarNormal").addEventListener("click", () => {
+      const nombreInput = document.getElementById("nombreNormal").value.trim();
+      const apellidoInput = document.getElementById("apellidoNormal").value.trim();
+      const genero = toggleNormal.dataset.genero;
+
+      const resultado = generarNombreNormal(nombreInput, apellidoInput, genero);
+      document.getElementById("resultadoNormal").innerText = resultado;
+    });
+
+    // Botón generar afro
+    document.getElementById("botonGenerarAfro").addEventListener("click", () => {
+      const nombreInput = document.getElementById("nombreAfro").value.trim();
+      const apellidoInput = document.getElementById("apellidoAfro").value.trim();
+
+      const resultado = generarNombreAfro(nombreInput, apellidoInput);
+      document.getElementById("resultadoAfro").innerText = resultado;
+    });
+  </script>
+</body>
+</html>
